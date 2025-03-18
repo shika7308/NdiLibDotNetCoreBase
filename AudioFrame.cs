@@ -113,7 +113,7 @@ namespace NewTek.NDI
             }
         }
 
-        public XElement MetaData
+        public XElement? MetaData
         {
             get
             {

@@ -17,9 +17,7 @@ namespace NewTek.NDI
             get { return _selectedSource; }
             set
             {
-                if (value is null 
-                    || this._selectedSource is null
-                    || value.Name != _selectedSource.Name)
+                if (value.Name != _selectedSource.Name)
                 {
                     _selectedSource = value;
 
@@ -50,7 +48,7 @@ namespace NewTek.NDI
         }
 
         // Constructor
-        public Router(String routingName = "Routing", String[] groups = null)
+        public Router(string routingName = "Routing", string[]? groups = null)
         {
             _groups = groups;
             _routingName = routingName;
@@ -101,7 +99,7 @@ namespace NewTek.NDI
             Marshal.FreeHGlobal(source_t.p_ndi_name);
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         private void NotifyPropertyChanged(String info)
         {
@@ -201,9 +199,9 @@ namespace NewTek.NDI
             UpdateRouting();
         }
 
-        private String[] _groups = null;
+        private string[]? _groups = null;
         private IntPtr _routingInstancePtr = IntPtr.Zero;
         private Source _selectedSource = new Source();
-        private String _routingName = "Routing";
+        private string _routingName = "Routing";
     }
 }

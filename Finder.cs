@@ -1,4 +1,5 @@
-using System;
+﻿using System;
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -13,7 +14,7 @@ namespace NewTek.NDI
         { get; private set; }
             = ImmutableList<Source>.Empty;
 
-        public Finder(bool showLocalSources = false, String[] groups = null, String[] extraIps = null)
+        public Finder(bool showLocalSources = false, string[]? groups = null, string[]? extraIps = null)
         {
             IntPtr groupsNamePtr = IntPtr.Zero;
 
@@ -130,7 +131,7 @@ namespace NewTek.NDI
                         IntPtr p = IntPtr.Add(SourcesPtr, (i * SourceSizeInBytes));
 
                         // marshal it to a managed source and assign to our list
-                        NDIlib.source_t src = (NDIlib.source_t)Marshal.PtrToStructure(p, typeof(NDIlib.source_t));
+                        NDIlib.source_t src = Marshal.PtrToStructure<NDIlib.source_t>(p);
 
                         // .Net doesn't handle marshaling UTF-8 strings properly
                         String name = UTF.Utf8ToString(src.p_ndi_name);
@@ -159,12 +160,12 @@ namespace NewTek.NDI
         private object _sourceLock = new object();
 
         // a thread to find on so that the UI isn't dragged down
-        Thread _findThread = null;
+        Thread? _findThread = null;
 
         // a way to exit the thread safely
         bool _exitThread = false;
 
-        public event NewNdiSourceDiscovered NewNdiSourceDiscovered;
+        public event NewNdiSourceDiscovered? NewNdiSourceDiscovered;
     }
 
     public delegate void NewNdiSourceDiscovered(Source source);

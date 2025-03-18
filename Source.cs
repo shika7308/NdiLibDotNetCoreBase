@@ -69,7 +69,7 @@ namespace NewTek.NDI
             get { return _sourceName; }
         }
 
-        public Uri Uri
+        public Uri? Uri
         {
             get { return _uri; }
         }
@@ -82,6 +82,6 @@ namespace NewTek.NDI
         private String _name = String.Empty;
         private String _computerName = String.Empty;
         private String _sourceName = String.Empty;
-        private Uri _uri = null;
+        private Uri? _uri = null;
     }
 }

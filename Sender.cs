@@ -7,7 +7,7 @@ namespace NewTek.NDI
 {
     public class Sender : IDisposable
     {
-        public Sender(String sourceName, bool clockVideo = true, bool clockAudio = false, String[] groups = null, String failoverName = null)
+        public Sender(String sourceName, bool clockVideo = true, bool clockAudio = false, string[]? groups = null, string? failoverName = null)
         {
             if (String.IsNullOrEmpty(sourceName))
             {
@@ -23,17 +23,7 @@ namespace NewTek.NDI
             // make a flat list of groups if needed
             if (groups != null)
             {
-                StringBuilder flatGroups = new StringBuilder();
-                foreach (String group in groups)
-                {
-                    flatGroups.Append(group);
-                    if (group != groups.Last())
-                    {
-                        flatGroups.Append(',');
-                    }
-                }
-
-                groupsNamePtr = UTF.StringToUtf8(flatGroups.ToString());
+                groupsNamePtr = UTF.StringToUtf8(string.Join(',', groups));
             }
 
             // Create an NDI source description
