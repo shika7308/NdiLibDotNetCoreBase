@@ -9,9 +9,9 @@ namespace NewTek.NDI
 {
     public class Finder : IDisposable
     {
-        public List<Source> Sources
-        { get; }
-            = new List<Source>();
+        public ImmutableList<Source> Sources
+        { get; private set; }
+            = ImmutableList<Source>.Empty;
 
         public Finder(bool showLocalSources = false, String[] groups = null, String[] extraIps = null)
         {
@@ -141,7 +141,7 @@ namespace NewTek.NDI
                         if (!this.Sources.Any(item => item.Name == name))
                         {
                             var toAdd = new Source(src);
-                            this.Sources.Add(toAdd);
+                            this.Sources = this.Sources.Add(toAdd);
                             this.NewNdiSourceDiscovered?.Invoke(toAdd);
                         }
                     }
@@ -151,7 +151,7 @@ namespace NewTek.NDI
 
         public void ForceRefresh()
         {
-            this.Sources.Clear();
+            this.Sources = this.Sources.Clear();
         }
 
         private IntPtr _findInstancePtr = IntPtr.Zero;
