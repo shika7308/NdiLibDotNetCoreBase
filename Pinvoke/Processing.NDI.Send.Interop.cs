@@ -197,12 +197,12 @@ namespace NewTek
 
 		// Retrieve the source information for the given sender instance.
 		// This can throw an ArgumentException or ArgumentNullException!
-		public static source_t send_get_source_name(IntPtr p_instance, ref source_t p_failover_source)
+		public static void send_get_source_name(IntPtr p_instance, ref source_t p_failover_source, out source_t instance)
 		{
 			if (IntPtr.Size == 8)
-				return (source_t)Marshal.PtrToStructure(UnsafeNativeMethods.send_get_source_name_64(p_instance), typeof(source_t));
+				instance = Marshal.PtrToStructure<source_t>(UnsafeNativeMethods.send_get_source_name_64(p_instance));
 			else
-				return (source_t)Marshal.PtrToStructure(UnsafeNativeMethods.send_get_source_name_32(p_instance), typeof(source_t));
+				instance = Marshal.PtrToStructure<source_t>(UnsafeNativeMethods.send_get_source_name_32(p_instance));
 		}
 
 		[SuppressUnmanagedCodeSecurity]
