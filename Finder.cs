@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -20,17 +20,7 @@ namespace NewTek.NDI
             // make a flat list of groups if needed
             if (groups != null)
             {
-                StringBuilder flatGroups = new StringBuilder();
-                foreach (String group in groups)
-                {
-                    flatGroups.Append(group);
-                    if (group != groups.Last())
-                    {
-                        flatGroups.Append(',');
-                    }
-                }
-
-                groupsNamePtr = UTF.StringToUtf8(flatGroups.ToString());
+                groupsNamePtr = UTF.StringToUtf8(string.Join(',', groups));
             }
 
             // This is also optional.
@@ -48,17 +38,7 @@ namespace NewTek.NDI
             // make a flat list of ip addresses as comma separated strings
             if (extraIps != null)
             {
-                StringBuilder flatIps = new StringBuilder();
-                foreach (String ipStr in extraIps)
-                {
-                    flatIps.Append(ipStr);
-                    if (ipStr != groups.Last())
-                    {
-                        flatIps.Append(',');
-                    }
-                }
-
-                extraIpsPtr = UTF.StringToUtf8(flatIps.ToString());
+                extraIpsPtr = UTF.StringToUtf8(string.Join(',', extraIps));
             }
 
             // how we want our find to operate
