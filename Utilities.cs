@@ -11,35 +11,42 @@ namespace NewTek.NDI
     [SuppressUnmanagedCodeSecurity]
     public static partial class UTF
     {
-        // This REQUIRES you to use Marshal.FreeHGlobal() on the returned pointer!
-        public static IntPtr StringToUtf8(String managedString)
+        private static class NativeLibrary
         {
-            int len = Encoding.UTF8.GetByteCount(managedString);
+            private const string LibraryName = "libc";
 
-            byte[] buffer = new byte[len + 1];
+            [DllImport(LibraryName, EntryPoint = "strlen", CallingConvention = CallingConvention.Cdecl)]
+            public static extern UIntPtr strlen(IntPtr str);
 
-            Encoding.UTF8.GetBytes(managedString, 0, managedString.Length, buffer, 0);
-
-            IntPtr nativeUtf8 = Marshal.AllocHGlobal(buffer.Length);
-
-            Marshal.Copy(buffer, 0, nativeUtf8, buffer.Length);
-
-            return nativeUtf8;
+            public static uint GetStringLength(IntPtr utf8String)
+            {
+                if (utf8String == IntPtr.Zero)
+                    return 0;
+                    
+                return (uint)strlen(utf8String);
+            }
         }
 
-        // this version will also return the length of the utf8 string
+
         // This REQUIRES you to use Marshal.FreeHGlobal() on the returned pointer!
-        public static IntPtr StringToUtf8(String managedString, out int utf8Length)
+        public static IntPtr StringToUtf8(string managedString)
+        {
+            return StringToUtf8(managedString, out _);
+        }
+
+        // this version will also return the length of the utf8 string.
+        // The length does not include the null terminator.
+        // This REQUIRES you to use Marshal.FreeHGlobal() on the returned pointer!
+        public static IntPtr StringToUtf8(string managedString, out int utf8Length)
         {
             utf8Length = Encoding.UTF8.GetByteCount(managedString);
 
-            byte[] buffer = new byte[utf8Length + 1];
+            IntPtr nativeUtf8 = Marshal.AllocHGlobal(utf8Length + 1);
 
-            Encoding.UTF8.GetBytes(managedString, 0, managedString.Length, buffer, 0);
-
-            IntPtr nativeUtf8 = Marshal.AllocHGlobal(buffer.Length);
-
-            Marshal.Copy(buffer, 0, nativeUtf8, buffer.Length);
+            unsafe {
+                Span<byte> buffer = new(nativeUtf8.ToPointer(), utf8Length + 1);
+                Encoding.UTF8.GetBytes(managedString, buffer);
+            }
 
             return nativeUtf8;
         }
@@ -49,7 +56,7 @@ namespace NewTek.NDI
         public static string Utf8ToString(IntPtr nativeUtf8, uint? length = null)
         {
             if (nativeUtf8 == IntPtr.Zero)
-                return String.Empty;
+                return string.Empty;
 
             uint len = 0;
 
@@ -59,18 +66,12 @@ namespace NewTek.NDI
             }
             else
             {
-                // try to find the terminator
-                while (Marshal.ReadByte(nativeUtf8, (int)len) != 0)
-                {
-                    ++len;
-                }
+                len = NativeLibrary.GetStringLength(nativeUtf8);
             }
-
-            byte[] buffer = new byte[len];
-
-            Marshal.Copy(nativeUtf8, buffer, 0, buffer.Length);
-
-            return Encoding.UTF8.GetString(buffer);
+            
+            unsafe {
+                return Encoding.UTF8.GetString(new ReadOnlySpan<byte>(nativeUtf8.ToPointer(), (int)len));
+            }
         }
 
     } // class NDILib
