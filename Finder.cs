@@ -114,7 +114,7 @@ namespace NewTek.NDI
         private void FindThreadProc()
         {
             // the size of an NDIlib.source_t, for pointer offsets
-            int SourceSizeInBytes = Marshal.SizeOf(typeof(NDIlib.source_t));
+            int SourceSizeInBytes = Marshal.SizeOf<NDIlib.source_t>();
 
             while (!_exitThread)
             {
@@ -124,28 +124,32 @@ namespace NewTek.NDI
                     uint NumSources = 0;
                     IntPtr SourcesPtr = NDIlib.find_get_current_sources(_findInstancePtr, ref NumSources);
 
+                    var sourceList = new List<Source>();
                     // convert each unmanaged ptr into a managed NDIlib.source_t
                     for (int i = 0; i < NumSources; i++)
                     {
                         // source ptr + (index * size of a source)
-                        IntPtr p = IntPtr.Add(SourcesPtr, (i * SourceSizeInBytes));
-
-                        // marshal it to a managed source and assign to our list
-                        NDIlib.source_t src = Marshal.PtrToStructure<NDIlib.source_t>(p);
-
-                        // .Net doesn't handle marshaling UTF-8 strings properly
-                        String name = UTF.Utf8ToString(src.p_ndi_name);
-
-                        // Add it to the list if not already in the list.
-                        // We don't have to remove because NDI applications remember any sources seen during each run.
-                        // They might be selected and come back when the connection is restored.
-                        if (!this.Sources.Any(item => item.Name == name))
+                        IntPtr p = IntPtr.Add(SourcesPtr, i * SourceSizeInBytes);
+                        sourceList.Add(new Source(p));
+                    }
+                    
+                    foreach (var source in sourceList)
+                    {
+                        if (!this.Sources.Any(item => item.Name == source.Name))
                         {
-                            var toAdd = new Source(src);
-                            this.Sources = this.Sources.Add(toAdd);
-                            this.NewNdiSourceDiscovered?.Invoke(toAdd);
+                            this.NdiSourceFound?.Invoke(source);
                         }
                     }
+
+                    foreach (var source in this.Sources)
+                    {
+                        if (!sourceList.Any(item => item.Name == source.Name))
+                        {
+                            this.NdiSourceLost?.Invoke(source);
+                        }
+                    }
+
+                    this.Sources = sourceList.ToImmutableList();
                 }
             }
         }
@@ -165,8 +169,9 @@ namespace NewTek.NDI
         // a way to exit the thread safely
         bool _exitThread = false;
 
-        public event NewNdiSourceDiscovered? NewNdiSourceDiscovered;
+        public event NdiSourceChanged? NdiSourceFound;
+        public event NdiSourceChanged? NdiSourceLost;
     }
 
-    public delegate void NewNdiSourceDiscovered(Source source);
+    public delegate void NdiSourceChanged(Source source);
 }

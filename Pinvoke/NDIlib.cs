@@ -88,11 +88,14 @@ public static partial class NDIlib
 
 	private static nint ResolveDllImport(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
 	{
-		var libName = string.Empty;
-        var useAlternateLoadLogic = false;
-
+        if (libraryName != LibraryName)
+        {
+            return IntPtr.Zero;
+        }
+        
 		if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 		{
+		    var libName = string.Empty;
 			if (RuntimeInformation.ProcessArchitecture == Architecture.X64)
 			{
 				libName = "Processing.NDI.Lib.x64.dll";
@@ -105,39 +108,36 @@ public static partial class NDIlib
 			{
 				throw new NotImplementedException("Non-x86-based arch not supported on Windows.");
 			}
+    		return NativeLibrary.TryLoad(libName, out var handle) ? handle : IntPtr.Zero;
 		}
 		else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
 		{
-            useAlternateLoadLogic = true;
-			libName = "libndi.so";
+            var dllDir = AppDomain.CurrentDomain.BaseDirectory;
+            IntPtr handle = IntPtr.Zero;
+    		if (NativeLibrary.TryLoad(Path.Combine(dllDir, "libndi.so"), out handle)) return handle;
+            var arch = RuntimeInformation.ProcessArchitecture switch {
+                Architecture.X86 => "linux-x86",
+                Architecture.X64 => "linux-x86-64",
+                Architecture.Arm => "linux-arm",
+                Architecture.Arm64 => "linux-arm64",
+                _ => throw new NotImplementedException("Unsupported architecture.")
+            };
+            if (NativeLibrary.TryLoad(Path.Combine(dllDir, $"lib/{arch}/libndi.so"), out handle)) return handle;
 		}
 		else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
 		{
-			libName = "libndi.dylib";
+            IntPtr handle = IntPtr.Zero;
+            if (NativeLibrary.TryLoad("/Library/NDI SDK for Apple/lib/macOS/libndi.dylib", out handle)) return handle;
+            var dllDir = AppDomain.CurrentDomain.BaseDirectory;
+			// libName = "libndi.dylib";
+            if (NativeLibrary.TryLoad(Path.Combine(dllDir, $"lib/osx-arm64/libndi.dylib"), out handle)) return handle;
 		}
 		else
 		{
 			throw new NotImplementedException($"{RuntimeInformation.OSDescription} not supported.");
 		}
-
-        var handle = nint.Zero;
-
-        if(useAlternateLoadLogic)
-        {
-            var libPath = Path.Combine(
-                AppDomain.CurrentDomain.BaseDirectory,
-                libName
-            );
-
-            NativeLibrary.TryLoad(libPath, out handle);
-        }
-        else
-        {
-    		NativeLibrary.TryLoad(libName, out handle);
-        }
-
-
-		return handle;
+        
+        return IntPtr.Zero;
     }
 } // namespace NewTek
 

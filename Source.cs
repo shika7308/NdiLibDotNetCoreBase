@@ -10,6 +10,17 @@ namespace NewTek.NDI
         {
         }
 
+        public Source(IntPtr p_source)
+        {
+            unsafe {
+                NDIlib.source_t* source = (NDIlib.source_t*)p_source;
+                _name = UTF.Utf8ToString(source->p_ndi_name);
+                var uriString = UTF.Utf8ToString(source->p_url_address);
+                if (!Uri.TryCreate(uriString, UriKind.Absolute, out _uri))
+                    _uri = null;
+            }
+        }
+
         // Construct from NDIlib.source_t
         public Source(NDIlib.source_t source_t)
         {
