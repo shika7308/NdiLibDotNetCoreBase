@@ -14,10 +14,11 @@ namespace NewTek.NDI
         {
             unsafe {
                 NDIlib.source_t* source = (NDIlib.source_t*)p_source;
-                _name = UTF.Utf8ToString(source->p_ndi_name);
-                var uriString = UTF.Utf8ToString(source->p_url_address);
-                if (!Uri.TryCreate(uriString, UriKind.Absolute, out _uri))
-                    _uri = null;
+                // _name = UTF.Utf8ToString(source->p_ndi_name);
+                // var uriString = UTF.Utf8ToString(source->p_url_address);
+                // if (!Uri.TryCreate(uriString, UriKind.Absolute, out _uri))
+                //     _uri = null;
+                Name = UTF.Utf8ToString(source->p_ndi_name);
             }
         }
 
