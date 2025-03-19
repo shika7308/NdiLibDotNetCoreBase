@@ -13,7 +13,11 @@ namespace NewTek.NDI
     {
         private static class NativeLibrary
         {
+#if WINDOWS
+            private const string LibraryName = "msvcrt";
+#else
             private const string LibraryName = "libc";
+#endif
 
             [DllImport(LibraryName, EntryPoint = "strlen", CallingConvention = CallingConvention.Cdecl)]
             public static extern UIntPtr strlen(IntPtr str);

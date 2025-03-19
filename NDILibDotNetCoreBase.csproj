@@ -44,10 +44,10 @@
     <DefineConstants>$(DefineConstants);LINUX_AMD64</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'win-arm64'">
-    <DefineConstants>$(DefineConstants);WINDOWS_ARM64</DefineConstants>
+    <DefineConstants>$(DefineConstants);WINDOWS;WINDOWS_ARM64</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'win-x64'">
-    <DefineConstants>$(DefineConstants);WINDOWS_AMD64</DefineConstants>
+    <DefineConstants>$(DefineConstants);WINDOWS;WINDOWS_AMD64</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'osx-arm64'">
     <DefineConstants>$(DefineConstants);OSX_ARM64</DefineConstants>
