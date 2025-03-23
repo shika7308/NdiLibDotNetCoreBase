@@ -90,7 +90,23 @@ public static partial class NDIlib
 	{
         if (libraryName != LibraryName)
         {
-            return IntPtr.Zero;
+            if (libraryName == "libc")
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    if (NativeLibrary.TryLoad("msvcrt", assembly, searchPath, out var handle))
+                    {
+                        return handle;
+                    }
+                }
+                else
+                {
+                    if (NativeLibrary.TryLoad("libc", assembly, searchPath, out var handle))
+                    {
+                        return handle;
+                    }
+                }
+            }
         }
         
 		if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))

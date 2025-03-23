@@ -28,6 +28,12 @@
 	  <None Update="lib\osx-arm64\libndi.dylib">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
+	  <None Update="lib\windows\Processing.NDI.Lib.x64.dll">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="lib\windows\Processing.NDI.Lib.x86.dll">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	  <None Update="logo.png">
 	    <Pack>True</Pack>
 	    <PackagePath>\</PackagePath>
@@ -44,10 +50,10 @@
     <DefineConstants>$(DefineConstants);LINUX_AMD64</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'win-arm64'">
-    <DefineConstants>$(DefineConstants);WINDOWS;WINDOWS_ARM64</DefineConstants>
+    <DefineConstants>$(DefineConstants);WINDOWS_ARM64</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'win-x64'">
-    <DefineConstants>$(DefineConstants);WINDOWS;WINDOWS_AMD64</DefineConstants>
+    <DefineConstants>$(DefineConstants);WINDOWS_AMD64</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'osx-arm64'">
     <DefineConstants>$(DefineConstants);OSX_ARM64</DefineConstants>
