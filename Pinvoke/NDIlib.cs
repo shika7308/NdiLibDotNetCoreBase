@@ -108,7 +108,11 @@ public static partial class NDIlib
 			{
 				throw new NotImplementedException("Non-x86-based arch not supported on Windows.");
 			}
-    		return NativeLibrary.TryLoad(libName, out var handle) ? handle : IntPtr.Zero;
+            var handle = IntPtr.Zero;
+    		if (NativeLibrary.TryLoad(libName, out handle)) return handle;
+
+            var dllDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "lib", "windows");
+            if (NativeLibrary.TryLoad(Path.Combine(dllDir, libName), out handle)) return handle;
 		}
 		else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
 		{
@@ -122,15 +126,16 @@ public static partial class NDIlib
                 Architecture.Arm64 => "linux-arm64",
                 _ => throw new NotImplementedException("Unsupported architecture.")
             };
-            if (NativeLibrary.TryLoad(Path.Combine(dllDir, $"lib/{arch}/libndi.so"), out handle)) return handle;
+            dllDir = Path.Combine(dllDir, "lib", arch);
+            if (NativeLibrary.TryLoad(Path.Combine(dllDir, "libndi.so"), out handle)) return handle;
 		}
 		else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
 		{
             IntPtr handle = IntPtr.Zero;
-            if (NativeLibrary.TryLoad("/Library/NDI SDK for Apple/lib/macOS/libndi.dylib", out handle)) return handle;
-            var dllDir = AppDomain.CurrentDomain.BaseDirectory;
-			// libName = "libndi.dylib";
-            if (NativeLibrary.TryLoad(Path.Combine(dllDir, $"lib/osx-arm64/libndi.dylib"), out handle)) return handle;
+            var dllDir = "/Library/NDI SDK for Apple/lib/macOS";
+            if (NativeLibrary.TryLoad(Path.Combine(dllDir, "libndi.dylib"), out handle)) return handle;
+            dllDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "lib", "osx-arm64");
+            if (NativeLibrary.TryLoad(Path.Combine(dllDir, "libndi.dylib"), out handle)) return handle;
 		}
 		else
 		{
