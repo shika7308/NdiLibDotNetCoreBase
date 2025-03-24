@@ -10,9 +10,9 @@ namespace NewTek.NDI
 {
     public class Finder : IDisposable
     {
-        public ImmutableList<Source> Sources
+        public ImmutableArray<Source> Sources
         { get; private set; }
-            = ImmutableList<Source>.Empty;
+            = ImmutableArray<Source>.Empty;
 
         public Finder(bool showLocalSources = false, string[]? groups = null, string[]? extraIps = null)
         {
@@ -124,32 +124,47 @@ namespace NewTek.NDI
                     uint NumSources = 0;
                     IntPtr SourcesPtr = NDIlib.find_get_current_sources(_findInstancePtr, ref NumSources);
 
-                    var sourceList = new List<Source>();
+                    var newSources = new Source[(int)NumSources];
                     // convert each unmanaged ptr into a managed NDIlib.source_t
                     for (int i = 0; i < NumSources; i++)
                     {
                         // source ptr + (index * size of a source)
                         IntPtr p = IntPtr.Add(SourcesPtr, i * SourceSizeInBytes);
-                        sourceList.Add(new Source(p));
+                        newSources[i] = new Source(p);
                     }
                     
-                    foreach (var source in sourceList)
+                    for (var i = 0; i < newSources.Length; i++)
                     {
-                        if (!this.Sources.Any(item => item.Name == source.Name))
+                        var source = newSources[i];
+                        var foundedSource = this.Sources.FirstOrDefault(item => item.Name == source.Name);
+                        if (foundedSource is null)
                         {
                             this.NdiSourceFound?.Invoke(source);
                         }
-                    }
-
-                    foreach (var source in this.Sources)
-                    {
-                        if (!sourceList.Any(item => item.Name == source.Name))
+                        else
                         {
-                            this.NdiSourceLost?.Invoke(source);
+                            newSources[i] = foundedSource;
                         }
                     }
 
-                    this.Sources = sourceList.ToImmutableList();
+                    foreach (var oldSource in this.Sources)
+                    {
+                        var contains = false;
+                        foreach (var newSource in newSources)
+                        {
+                            if (oldSource == newSource)
+                            {
+                                contains = true;
+                                break;
+                            }
+                        }
+                        if (!contains)
+                        {
+                            this.NdiSourceLost?.Invoke(oldSource);
+                        }
+                    }
+
+                    this.Sources = newSources.ToImmutableArray();
                 }
             }
         }
