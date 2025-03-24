@@ -106,6 +106,7 @@ public static partial class NDIlib
                         return handle;
                     }
                 }
+                return IntPtr.Zero;
             }
         }
         
