@@ -118,7 +118,8 @@ namespace NewTek.NDI
             while (!_exitThread)
             {
                 // Wait up to 500ms sources to change
-                if (NDIlib.find_wait_for_sources(_findInstancePtr, 500))
+                // if (NDIlib.find_wait_for_sources(_findInstancePtr, 500))
+                if (NDIlib.find_wait_for_sources(_findInstancePtr, 10000))
                 {
                     uint NumSources = 0;
                     IntPtr SourcesPtr = NDIlib.find_get_current_sources(_findInstancePtr, ref NumSources);
